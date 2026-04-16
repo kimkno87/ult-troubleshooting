@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>ULT 트러블슈팅 | TSX/TDE Series</title>
+<style>
+:root {
+  --bg:#08111f;
+  --surf:#0f1c2e;
+  --card:#162235;
+  --card2:#1c2d44;
+  --bd:#1e3352;
+  --bd2:#284567;
+  --text:#cfe4f8;
+  --dim:#4a6a8a;
+  --dim2:#7a9cbd;
+  --red:#ff4444;
+  --red2:#ff6b6b;
+  --redbg:rgba(255,68,68,.10);
+  --redbd:rgba(255,68,68,.28);
+  --blu:#2eb8f5;
+  --blu2:#60ccf7;
+  --blubg:rgba(46,184,245,.10);
+  --blubd:rgba(46,184,245,.28);
+  --grn:#3dd68c;
+  --grn2:#6fe4ac;
+  --grnbg:rgba(61,214,140,.10);
+  --grnbd:rgba(61,214,140,.28);
+  --amb:#f5bc1a;
+  --ambbg:rgba(245,188,26,.10);
+  --ambbd:rgba(245,188,26,.28);
+  --pur:#b87cf5;
+  --purbg:rgba(184,124,245,.10);
+  --purbd:rgba(184,124,245,.28);
+  --tel:#1ecfb8;
+  --tel2:#45ddc8;
+  --ora:#ff6b35;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{
+  background:var(--bg);color:var(--text);min-height:100vh;
+  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",sans-serif;
+}
+
+/* ── 헤더 ── */
+.hdr{
+  padding:16px 16px 12px;
+  background:linear-gradient(180deg,rgba(30,51,82,.6) 0%,transparent 100%);
+  border-bottom:1px solid var(--bd);
+  position:sticky;top:0;z-index:100;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+}
+.hdr-badge{
+  font-size:9px;letter-spacing:2.5px;color:var(--tel);
+  text-transform:uppercase;font-weight:700;margin-bottom:5px;display:block;
+}
+.hdr-title{font-size:20px;font-weight:800;letter-spacing:-.3px;
+  background:linear-gradient(90deg,var(--text) 0%,var(--tel2) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hdr-sub{font-size:11px;color:var(--dim);margin-top:3px}
+
+/* ── 탭바 ── */
+.tabbar{
+  display:flex;background:var(--surf);
+  border-bottom:1px solid var(--bd);position:sticky;top:64px;z-index:99;
+}
+.tab-btn{
+  flex:1;padding:13px 0;font-size:13px;font-weight:600;
+  color:var(--dim);background:transparent;border:none;
+  border-bottom:2px solid transparent;cursor:pointer;
+  transition:all .2s;letter-spacing:.3px;
+  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+}
+.tab-btn.on{color:var(--tel);border-bottom-color:var(--tel)}
+
+/* ── 섹션 ── */
+.section{display:none}
+.section.on{display:block}
+
+/* ── 정상값 참조 바 ── */
+.ref-bar{
+  padding:10px 14px;
+  background:var(--surf);
+  border-bottom:1px solid var(--bd);
+}
+.ref-bar-title{
+  font-size:9px;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--dim);margin-bottom:7px;font-weight:700;
+}
+.ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.ref-item{
+  background:var(--card);border:1px solid var(--bd);
+  border-radius:7px;padding:6px 9px;
+}
+.ref-id{font-size:10px;font-weight:800;color:var(--tel);font-family:monospace;margin-bottom:1px}
+.ref-name{font-size:10px;color:var(--dim);line-height:1.3;margin-bottom:2px}
+.ref-norm{font-size:11px;font-weight:700;font-family:monospace}
+.ref-norm.warm{color:var(--amb)}
+.ref-norm.cool{color:var(--blu)}
+.ref-norm.cold{color:var(--pur)}
+.ref-norm.hot{color:var(--red)}
+.ref-norm.ctrl{color:var(--grn)}
+
+/* ── 선택 영역 ── */
+.pick-area{padding:12px 14px;border-bottom:1px solid var(--bd)}
+.pick-label{
+  font-size:10px;letter-spacing:1px;text-transform:uppercase;
+  color:var(--dim);margin-bottom:8px;font-weight:700;
+}
+.pick-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.pick-item{
+  background:var(--card);border:1px solid var(--bd2);
+  border-radius:9px;padding:9px 11px;cursor:pointer;
+  transition:border-color .15s,background .15s;
+  -webkit-user-select:none;user-select:none;
+}
+.pick-item:active{opacity:.75}
+.pick-item.sel{border-color:var(--tel);background:rgba(30,207,184,.08)}
+.pick-item-id{font-size:10px;font-weight:800;color:var(--tel);font-family:monospace;margin-bottom:2px}
+.pick-item-name{font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px;line-height:1.3}
+.pick-item-norm{font-size:10px;color:var(--dim);font-family:monospace}
+
+/* ── 상태 버튼 ── */
+.state-area{padding:12px 14px;border-bottom:1px solid var(--bd);display:none}
+.state-area.show{display:block}
+.state-header{
+  font-size:11px;font-weight:700;color:var(--dim2);
+  margin-bottom:9px;line-height:1.4;
+}
+.state-btn{
+  width:100%;padding:10px 14px;border-radius:8px;
+  border:1px solid var(--bd2);background:var(--card);
+  color:var(--dim2);font-size:13px;font-weight:600;
+  cursor:pointer;text-align:left;display:flex;
+  align-items:center;gap:10px;margin-bottom:6px;
+  transition:all .15s;
+  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  -webkit-user-select:none;user-select:none;
+}
+.state-btn:active{opacity:.75}
+.state-btn .ic{font-size:14px;width:20px;text-align:center;flex-shrink:0}
+.state-btn .sh{font-size:10px;color:var(--dim);display:block;margin-top:1px;font-family:monospace}
+.state-btn.up.on{background:var(--redbg);border-color:var(--redbd);color:var(--red)}
+.state-btn.nrm.on{background:var(--grnbg);border-color:var(--grnbd);color:var(--grn)}
+.state-btn.dn.on{background:var(--blubg);border-color:var(--blubd);color:var(--blu)}
+
+/* ── 결과 영역 ── */
+.result-area{padding:12px 14px}
+.no-pick{
+  text-align:center;padding:28px 0;color:var(--dim);font-size:13px;
+}
+.no-pick .big{font-size:38px;opacity:.2;margin-bottom:10px}
+.ok-msg{
+  text-align:center;padding:20px 0;
+}
+.ok-icon{font-size:22px;color:var(--grn);margin-bottom:6px}
+.ok-text{font-size:14px;font-weight:600;color:var(--grn)}
+.ok-sub{font-size:12px;color:var(--dim);margin-top:4px}
+
+.pat-badge{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:6px 14px;border-radius:20px;
+  font-size:12px;font-weight:700;margin-bottom:10px;
+  letter-spacing:.3px;
+}
+.sum-text{font-size:12px;color:var(--dim2);margin-bottom:12px;line-height:1.6}
+
+/* ── 원인 카드 ── */
+.cause-card{
+  border-radius:10px;border:1px solid var(--bd2);
+  overflow:hidden;margin-bottom:8px;
+}
+.cause-hdr{
+  padding:11px 13px;display:flex;align-items:center;
+  gap:9px;cursor:pointer;
+  -webkit-user-select:none;user-select:none;
+  transition:background .15s;
+}
+.cause-hdr:active{background:var(--card2)}
+.prob{
+  font-size:10px;font-weight:800;padding:2px 8px;
+  border-radius:8px;min-width:52px;text-align:center;flex-shrink:0;
+}
+.prob.h{background:rgba(255,68,68,.15);color:var(--red)}
+.prob.m{background:rgba(245,188,26,.15);color:var(--amb)}
+.prob.l{background:rgba(61,214,140,.15);color:var(--grn)}
+.cause-title{font-size:13px;font-weight:600;flex:1;line-height:1.35;color:var(--text)}
+.cause-arr{font-size:11px;color:var(--dim);flex-shrink:0;transition:transform .2s}
+.cause-hdr.open .cause-arr{transform:rotate(180deg)}
+.cause-body{display:none;border-top:1px solid var(--bd)}
+.cause-body.open{display:block}
+.cause-inner{padding:11px 13px}
+
+.sub-label{
+  font-size:9px;letter-spacing:1.2px;text-transform:uppercase;
+  color:var(--dim);margin:10px 0 5px;font-weight:700;
+}
+.sub-label:first-child{margin-top:0}
+.item-li{
+  display:flex;align-items:flex-start;gap:7px;
+  margin-bottom:5px;
+}
+.item-li .dot{
+  width:5px;height:5px;border-radius:50%;
+  margin-top:6px;flex-shrink:0;
+}
+.item-li span{font-size:12px;color:var(--dim2);line-height:1.55}
+.act-item{
+  background:var(--grnbg);border:1px solid var(--grnbd);
+  border-radius:7px;padding:8px 10px;font-size:12px;color:var(--grn);
+  display:flex;gap:8px;align-items:flex-start;
+  margin-bottom:5px;line-height:1.5;
+}
+.act-n{font-family:monospace;font-size:11px;font-weight:800;
+  min-width:16px;padding-top:1px;flex-shrink:0}
+.warn-box{
+  background:var(--redbg);border:1px solid var(--redbd);
+  border-radius:7px;padding:8px 10px;font-size:12px;color:var(--red);
+  margin-top:8px;display:flex;gap:7px;align-items:flex-start;line-height:1.5;
+}
+.note-box{
+  background:var(--card);border:1px solid var(--bd);
+  border-radius:9px;padding:11px 13px;font-size:11px;
+  color:var(--dim);line-height:1.85;margin-top:4px;
+}
+.note-box strong{color:var(--dim2);font-weight:700}
+.nm{font-family:monospace;font-weight:700}
+.nm.red{color:var(--red)}
+.nm.blu{color:var(--blu)}
+.nm.grn{color:var(--grn)}
+
+/* ── 냉매압 전용 ── */
+.stage-bar{display:flex;gap:8px;padding:12px 14px;border-bottom:1px solid var(--bd)}
+.stage-btn{
+  flex:1;padding:11px 0;border-radius:9px;
+  border:1px solid var(--bd2);background:var(--card);
+  color:var(--dim2);font-size:13px;font-weight:600;
+  cursor:pointer;transition:all .2s;text-align:center;line-height:1.4;
+  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+}
+.stage-btn.s1.on{background:rgba(255,107,53,.12);border-color:rgba(255,107,53,.45);color:var(--ora)}
+.stage-btn.s2.on{background:rgba(46,184,245,.12);border-color:rgba(46,184,245,.45);color:var(--blu)}
+
+.p-sel-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 14px;border-bottom:1px solid var(--bd)}
+.p-sel-head{
+  font-size:10px;letter-spacing:1px;text-transform:uppercase;
+  color:var(--dim);margin-bottom:7px;font-weight:700;
+  display:flex;align-items:center;gap:5px;
+}
+.p-dot{width:7px;height:7px;border-radius:50%;display:inline-block}
+.p-btn{
+  width:100%;padding:9px 11px;border-radius:7px;
+  border:1px solid var(--bd2);background:var(--card);
+  color:var(--dim2);font-size:12px;font-weight:600;
+  cursor:pointer;text-align:left;display:flex;
+  align-items:flex-start;gap:8px;margin-bottom:5px;
+  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  transition:all .15s;
+}
+.p-btn:active{opacity:.75}
+.p-btn .pic{font-size:12px;width:16px;text-align:center;flex-shrink:0;padding-top:1px}
+.p-btn .ph{font-size:10px;color:var(--dim);display:block;margin-top:1px;font-family:monospace}
+.p-btn.up.on{background:var(--redbg);border-color:var(--redbd);color:var(--red)}
+.p-btn.nrm.on{background:var(--grnbg);border-color:var(--grnbd);color:var(--grn)}
+.p-btn.dn.on{background:var(--blubg);border-color:var(--blubd);color:var(--blu)}
+
+.gauge-strip{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.gauge-card{border-radius:9px;padding:10px 12px}
+.gauge-card.hp{background:var(--redbg);border:1px solid var(--redbd)}
+.gauge-card.lp{background:var(--blubg);border:1px solid var(--blubd)}
+.gc-label{font-size:10px;color:var(--dim);margin-bottom:3px}
+.gc-state{font-size:12px;font-weight:700;font-family:monospace}
+.gc-state.up{color:var(--red)}
+.gc-state.dn{color:var(--blu)}
+.gc-state.nrm{color:var(--grn)}
+.gc-norm{font-size:10px;margin-top:5px;padding-top:4px;border-top:1px solid var(--bd);color:var(--dim)}
+
+/* ── 리셋 버튼 ── */
+.rst-btn{
+  display:block;width:calc(100% - 28px);
+  margin:2px 14px 14px;padding:9px;
+  border-radius:8px;border:1px solid var(--bd2);
+  background:transparent;color:var(--dim);font-size:12px;
+  cursor:pointer;
+  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+}
+.rst-btn:active{background:var(--surf)}
+
+/* ── 정보 배너 ── */
+.info-banner{
+  margin:0 14px 14px;
+  padding:10px 12px;
+  background:rgba(30,207,184,.06);
+  border:1px solid rgba(30,207,184,.2);
+  border-radius:8px;
+  font-size:11px;color:var(--tel);line-height:1.7;
+}
+.info-banner strong{font-weight:700}
+
+.footer{
+  padding:14px 14px 24px;text-align:center;
+  font-size:10px;color:var(--dim);
+  border-top:1px solid var(--bd);margin-top:4px;line-height:1.8;
+}
+</style>
+</head>
+<body>
+
+<!-- ── 헤더 ── -->
+<div class="hdr">
+  <span class="hdr-badge">Field Service Tool · Thermo Fisher Scientific</span>
+  <div class="hdr-title">ULT 냉동고 트러블슈팅</div>
+  <div class="hdr-sub">TSX / TDE Series -86°C · R-290 / R-170 · 333481H01 RevC</div>
+</div>
+
+<!-- ── 탭바 ── -->
+<div class="tabbar">
+  <button class="tab-btn on" onclick="switchTab('tc')">🌡 TC 온도 진단</button>
+  <button class="tab-btn" onclick="switchTab('pr')">⚡ 냉매압 진단</button>
+</div>
+
+<!-- ══════════════════════════════
+     TC 온도 진단 섹션
+══════════════════════════════ -->
+<div class="section on" id="sec-tc">
+
+  <!-- 정상범위 참조표 -->
+  <div class="ref-bar">
+    <div class="ref-bar-title">TC 센서 위치 및 정상 온도 (Table 13 · 333481H01 RevC)</div>
+    <div class="ref-grid">
+      <div class="ref-item"><div class="ref-id">TC1</div><div class="ref-name">1st Stage Suction</div><div class="ref-norm cool">-30 ~ -10°C</div></div>
+      <div class="ref-item"><div class="ref-id">TC2</div><div class="ref-name">Condenser Air Inlet</div><div class="ref-norm warm">+15 ~ +35°C</div></div>
+      <div class="ref-item"><div class="ref-id">TC3</div><div class="ref-name">Evaporator Inlet</div><div class="ref-norm cold">-60 ~ -45°C</div></div>
+      <div class="ref-item"><div class="ref-id">TC4</div><div class="ref-name">Evaporator Outlet</div><div class="ref-norm cold">-75 ~ -60°C</div></div>
+      <div class="ref-item"><div class="ref-id">TC6</div><div class="ref-name">2nd Stage Suction</div><div class="ref-norm cool">-40 ~ -20°C</div></div>
+      <div class="ref-item"><div class="ref-id">TC7</div><div class="ref-name">Liquid Line</div><div class="ref-norm warm">+20 ~ +40°C</div></div>
+      <div class="ref-item"><div class="ref-id">TC8</div><div class="ref-name">1st Stage Sump</div><div class="ref-norm warm">+30 ~ +60°C</div></div>
+      <div class="ref-item"><div class="ref-id">TC9</div><div class="ref-name">2nd Stage Sump</div><div class="ref-norm warm">+30 ~ +70°C</div></div>
+      <div class="ref-item" style="grid-column:1/-1"><div class="ref-id">TC10</div><div class="ref-name">BPHX / Interstage HX &nbsp;|&nbsp; 알고리즘: &lt;-40°C=정상가동 / &gt;10°C=Temp-Out</div><div class="ref-norm cool">-45 ~ -25°C</div></div>
+      <div class="ref-item" style="grid-column:1/-1"><div class="ref-id">RTD1</div><div class="ref-name">Control Probe (냉동고 내부 제어센서)</div><div class="ref-norm ctrl">설정값 ±2°C</div></div>
+    </div>
+  </div>
+
+  <!-- TC 선택 -->
+  <div class="pick-area">
+    <div class="pick-label">진단할 TC 센서 선택</div>
+    <div class="pick-grid" id="tc-pick-grid"></div>
+  </div>
+
+  <!-- 상태 선택 -->
+  <div class="state-area" id="tc-state-area">
+    <div class="state-header" id="tc-state-header">선택한 센서의 현재 상태</div>
+    <div id="tc-state-btns"></div>
+  </div>
+
+  <!-- 결과 -->
+  <div class="result-area" id="tc-result">
+    <div class="no-pick"><div class="big">↑</div>TC 센서를 선택하고<br>현재 온도 상태를 선택하세요</div>
+  </div>
+  <button class="rst-btn" id="tc-rst" onclick="tcReset()" style="display:none">↺ 초기화</button>
+</div>
+
+<!-- ══════════════════════════════
+     냉매압 진단 섹션
+══════════════════════════════ -->
+<div class="section" id="sec-pr">
+
+  <!-- 정상압력 참조 -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 14px;background:var(--surf);border-bottom:1px solid var(--bd)">
+    <div style="background:var(--card);border:1px solid rgba(255,107,53,.3);border-radius:8px;padding:9px 11px">
+      <div style="font-size:10px;font-weight:800;color:var(--ora);margin-bottom:6px">1st Stage · R-290</div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:3px"><span style="color:var(--dim)">고압 정상</span><span style="font-family:monospace;font-weight:700;color:var(--red)">120~200 PSIG</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:10px"><span style="color:var(--dim)">저압 정상</span><span style="font-family:monospace;font-weight:700;color:var(--blu)">0~30 PSIG</span></div>
+      <div style="font-size:9px;color:var(--dim);margin-top:5px;padding-top:4px;border-top:1px solid var(--bd);line-height:1.5">고압기준: 응축기 35°C → 159 PSIG<br>저압기준: 캐스케이드HX -40°C</div>
+    </div>
+    <div style="background:var(--card);border:1px solid rgba(46,184,245,.3);border-radius:8px;padding:9px 11px">
+      <div style="font-size:10px;font-weight:800;color:var(--blu);margin-bottom:6px">2nd Stage · R-170</div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:3px"><span style="color:var(--dim)">고압 정상</span><span style="font-family:monospace;font-weight:700;color:var(--red)">150~240 PSIG</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:10px"><span style="color:var(--dim)">저압 정상</span><span style="font-family:monospace;font-weight:700;color:var(--blu)">10~30 PSIG</span></div>
+      <div style="font-size:9px;color:var(--dim);margin-top:5px;padding-top:4px;border-top:1px solid var(--bd);line-height:1.5">고압기준: HX -40°C → 167 PSIG<br>저압기준: Evaporator -80°C → 18 PSIG</div>
+    </div>
+  </div>
+
+  <!-- Stage 선택 -->
+  <div class="stage-bar">
+    <button class="stage-btn s1" id="s1-btn" onclick="setStage(1)">1st Stage<br><small style="font-size:10px;font-weight:400;opacity:.8">R-290 · 고온측</small></button>
+    <button class="stage-btn s2" id="s2-btn" onclick="setStage(2)">2nd Stage<br><small style="font-size:10px;font-weight:400;opacity:.8">R-170 · 저온측</small></button>
+  </div>
+
+  <!-- 압력 선택 -->
+  <div class="p-sel-grid" id="p-sel-grid" style="display:none">
+    <div>
+      <div class="p-sel-head"><span class="p-dot" style="background:var(--red)"></span>고압 (토출측)</div>
+      <button class="p-btn up" id="hp-u" onclick="setP('hp','u')"><span class="pic">▲</span><span>높음 (이상 상승)<span class="ph" id="hp-u-h"></span></span></button>
+      <button class="p-btn nrm" id="hp-n" onclick="setP('hp','n')"><span class="pic">●</span><span>정상<span class="ph" id="hp-n-h"></span></span></button>
+      <button class="p-btn dn" id="hp-d" onclick="setP('hp','d')"><span class="pic">▼</span><span>낮음 (이상 저하)<span class="ph" id="hp-d-h"></span></span></button>
+    </div>
+    <div>
+      <div class="p-sel-head"><span class="p-dot" style="background:var(--blu)"></span>저압 (흡입측)</div>
+      <button class="p-btn up" id="lp-u" onclick="setP('lp','u')"><span class="pic">▲</span><span>높음 (이상 상승)<span class="ph" id="lp-u-h"></span></span></button>
+      <button class="p-btn nrm" id="lp-n" onclick="setP('lp','n')"><span class="pic">●</span><span>정상<span class="ph" id="lp-n-h"></span></span></button>
+      <button class="p-btn dn" id="lp-d" onclick="setP('lp','d')"><span class="pic">▼</span><span>낮음 (이상 저하)<span class="ph" id="lp-d-h"></span></span></button>
+    </div>
+  </div>
+
+  <!-- 결과 -->
+  <div class="result-area" id="p-result">
+    <div class="no-pick"><div class="big">↑</div>1st / 2nd Stage를 선택하고<br>고압·저압 상태를 선택하세요</div>
+  </div>
+  <button class="rst-btn" id="p-rst" onclick="pReset()" style="display:none">↺ 초기화</button>
+</div>
+
+<div class="footer">
+  TSX Universal Series -86°C · 매뉴얼 333481H01 RevC (04/17/2025)<br>
+  TDE50086LD · TSX70086FA 기준 · 수치는 참고값 — 정확한 범위는 P-T Chart 확인 요망
+</div>
+
+<script>
+/* ══════════════════════════════════════
+   데이터베이스
+══════════════════════════════════════ */
+
+// TC 센서 정의
+const TCS=[
+  {id:'TC1',name:'1st Stage Suction',sub:'1차 압축기 흡입',norm:'-30~-10°C',
+   h:{l:'높음 (0°C 이상)',h:'0°C 이상'},n:{l:'정상',h:'-30~-10°C'},l:{l:'낮음 (-40°C 이하)',h:'-40°C 이하'}},
+  {id:'TC2',name:'Condenser Air Inlet',sub:'응축기 외기 흡입',norm:'+15~+35°C',
+   h:{l:'높음 (37°C 초과)',h:'Extreme Ambient 경보 조건'},n:{l:'정상',h:'+15~+35°C'},l:{l:'낮음 (0°C 이하)',h:'동절기 저온'}},
+  {id:'TC3',name:'Evaporator Inlet',sub:'증발기 입구',norm:'-60~-45°C',
+   h:{l:'높음 (-30°C 이상)',h:'-30°C 이상'},n:{l:'정상',h:'-60~-45°C'},l:{l:'낮음 (-70°C 이하)',h:'-70°C 이하'}},
+  {id:'TC4',name:'Evaporator Outlet',sub:'증발기 출구',norm:'-75~-60°C',
+   h:{l:'높음 (-50°C 이상)',h:'-50°C 이상'},n:{l:'정상',h:'-75~-60°C'},l:{l:'낮음 (-85°C 이하)',h:'-85°C 이하'}},
+  {id:'TC6',name:'2nd Stage Suction',sub:'2차 압축기 흡입',norm:'-40~-20°C',
+   h:{l:'높음 (-10°C 이상)',h:'-10°C 이상'},n:{l:'정상',h:'-40~-20°C'},l:{l:'낮음 (-50°C 이하)',h:'-50°C 이하'}},
+  {id:'TC7',name:'Liquid Line',sub:'응축기 출구 액관',norm:'+20~+40°C',
+   h:{l:'높음 (45°C 초과)',h:'45°C 초과'},n:{l:'정상',h:'+20~+40°C'},l:{l:'낮음 (+10°C 이하)',h:'+10°C 이하'}},
+  {id:'TC8',name:'1st Stage Sump',sub:'1차 압축기 섬프',norm:'+30~+60°C',
+   h:{l:'높음 (80°C 초과)',h:'80°C 초과'},n:{l:'정상',h:'+30~+60°C'},l:{l:'낮음 (+20°C 이하)',h:'압축기 미가동'}},
+  {id:'TC9',name:'2nd Stage Sump',sub:'2차 압축기 섬프',norm:'+30~+70°C',
+   h:{l:'높음 (90°C 이상)',h:'경보 기준 94°C'},n:{l:'정상',h:'+30~+70°C'},l:{l:'낮음 (0°C 이하)',h:'사이클 오프 또는 미가동'}},
+  {id:'TC10',name:'BPHX / Interstage HX',sub:'캐스케이드 열교환기',norm:'-45~-25°C',
+   h:{l:'높음 (0°C 이상 → Temp-Out)',h:'> 10°C 시 2nd Stage 자동 정지'},n:{l:'정상',h:'-45~-25°C'},l:{l:'낮음 (-55°C 이하)',h:'-55°C 이하'}},
+  {id:'RTD1',name:'Control Probe',sub:'냉동고 내부 제어센서',norm:'설정값 ±2°C',
+   h:{l:'높음 (설정값 초과)',h:'High Temp Warning'},n:{l:'정상',h:'설정값 ±2°C'},l:{l:'낮음 (설정값 이하)',h:'Low Temp Warning'}},
+];
+
+// TC 트러블슈팅 DB
+const TC_DB={
+'TC1-h':{pat:'TC1 높음 — 1st 흡입 과열',color:'#ff4444',sum:'캐스케이드HX 이상 또는 1st 냉매 부족',causes:[
+  {t:'캐스케이드HX(TC10) 열교환 불량',p:'h',sy:['TC10 동시 상승','2nd 냉각 부족으로 HX 온도 상승','냉동고 온도 상승'],ch:['TC10 현재값 확인 (정상: -45~-25°C)','TC10 > -10°C이면 Temp-Out 진입 여부 확인'],ac:['HX 오염·오일 오염 점검','1st 냉매 충전량 확인 (R290 59~63g)'],w:null},
+  {t:'1st Stage 냉매 부족 (R-290 누설)',p:'h',sy:['TC1 상승 + TC8(Sump) 과열','TC7(Liquid Line) 낮아짐','냉동고 온도 서서히 상승'],ch:['HC 가스감지기로 1st 배관 누설 탐지','TC8 현재값 확인 (80°C 초과=과열)'],ac:['누설 부위 수리','R-290 재충전 (모델별 59~63g, 저울 정밀측정)'],w:'R-290(프로판) 가연성 — 환기·점화원 차단 필수'},
+]},
+'TC1-l':{pat:'TC1 낮음 — 1st 흡입 과냉',color:'#2eb8f5',sum:'냉매 과충전 또는 액압축 위험',causes:[
+  {t:'1st Stage 냉매 과충전',p:'h',sy:['TC1 -40°C 이하 비정상','어큐뮬레이터 결빙·착상 심화','1st 압축기 이상 소음 (액압축)'],ch:['TC1값과 정상범위(-30~-10°C) 비교','어큐뮬레이터 결빙 상태 확인'],ac:['R-290 소량 회수 후 재측정','목표: TC1 -10~-30°C 복귀'],w:'액압축 방치 시 압축기 즉각 파손 — 신속 조치'},
+]},
+'TC2-h':{pat:'TC2 높음 — 응축기 외기 고온',color:'#f5bc1a',sum:'Extreme Ambient 경보 조건 · 응축 불량',causes:[
+  {t:'설치 환경 온도 과도 상승',p:'h',sy:['TC2 > 37°C → Extreme Ambient Caution 발생','1st 고압 상승','냉동고 온도 상승'],ch:['설치 공간 실제 온도 측정','응축기 전후 최소 20cm 공간 확인'],ac:['환기 개선 (에어컨, 차광)','Settings > Controls > Extreme Ambient 설정 확인 (범위 32~40°C)'],w:null},
+  {t:'응축기 팬 불량 (Fan Low RPM 경보)',p:'h',sy:['Fan Low RPM Warning 경보','Dashboard Fan Speed = 0 RPM','TC7(Liquid Line) 상승'],ch:['Dashboard Fan - Condenser Fan Speed 확인','서비스 모드 팬 테스트 실행'],ac:['팬 모터 교체 (AFL2525HW-00, 24VDC)','핀코일 에어 블로우 청소 (6개월 주기 권장)'],w:null},
+]},
+'TC2-l':{pat:'TC2 낮음 — 응축기 외기 저온',color:'#2eb8f5',sum:'동절기 저온 환경 · 응축 과도',causes:[
+  {t:'설치 공간 온도 과도 저하 (동절기)',p:'m',sy:['TC2 < 10°C','1st Stage 고압 저하','응축 과도'],ch:['설치 공간 온도 확인 (권장: 15~32°C)'],ac:['난방 조치로 15°C 이상 유지'],w:null},
+]},
+'TC3-h':{pat:'TC3 높음 — 증발기 입구 온도 상승',color:'#ff4444',sum:'2nd 캐필러리 막힘 또는 Temp-Out 연쇄',causes:[
+  {t:'2nd 캐필러리 막힘 (수분 결빙)',p:'h',sy:['TC3·TC4 동시 상승','냉동고 온도 급격 상승','필터드라이어 결빙 (만지면 차가움)'],ch:['필터드라이어 결빙 확인','TC3·TC4 동시 분석 — 둘 다 높으면 캐필러리 막힘 강력 의심'],ac:['2nd 필터드라이어(75380H01) 즉시 교체','캐필러리 질소 플러싱','500 micron 이하 진공 후 냉매 재충전'],w:'R-170 배관 개방 시 극저온 가스 — 보호장갑 필수'},
+  {t:'TC10 > 10°C → Temp-Out으로 인한 TC3 상승',p:'h',sy:['TC10 상승 이력','알고리즘 PROTECTION[3] 상태','TC3 연쇄 상승'],ch:['TC10 현재값 확인','이벤트 로그 Temp-Out 기록 확인'],ac:['도어 오픈·과부하 제거','TC10 < -40°C 복귀 후 자동 재시작 (TC1 < 0°C 조건도 충족 필요)'],w:null},
+]},
+'TC3-l':{pat:'TC3 낮음 — 증발기 입구 과냉',color:'#b87cf5',sum:'R-170 과충전 또는 착상 과다',causes:[
+  {t:'R-170 냉매 과충전',p:'m',sy:['TC3·TC4 함께 낮아짐'],ch:['충전량 재확인 (모델별 100~110g)'],ac:['소량 회수 후 재측정'],w:null},
+  {t:'Evaporator Tube 착상 과다',p:'m',sy:['냉동고 내 결빙 두꺼움'],ch:['냉동고 내부 착상 육안 확인','도어 씰 상태 점검'],ac:['수동 제상(Defrost) 실시','도어 씰 교체'],w:null},
+]},
+'TC4-h':{pat:'TC4 높음 — 증발기 출구 온도 상승',color:'#ff4444',sum:'2nd 냉매 부족 / 도어 불량 / 착상 과다',causes:[
+  {t:'2nd 냉매 부족 (R-170 누설)',p:'h',sy:['TC4·TC6 동시 상승','냉동고 RTD1 상승','배관 이음부 오일 자국'],ch:['HC 가스감지기로 2nd 배관 전체 점검','2nd 저압 측정 (10 PSIG 미만=부족)'],ac:['누설 부위 수리','R-170 재충전 (모델별 100~110g, 정밀 충전)'],w:'R-170 가연성 + 극저온 — 폭발방지형 감지기, 보호장갑 필수'},
+  {t:'도어 씰 불량 / 도어 과도 오픈',p:'m',sy:['도어 주변 착상','도어 오픈 시 급격한 온도 변화'],ch:['도어 씰 점검 (찢김·변형)','PEP(압력 평형 포트) 작동 상태 확인','이벤트 로그 Door Open 이력'],ac:['도어 씰 교체','PEP 착상 제거'],w:null},
+  {t:'Evaporator Tube 착상 과다',p:'m',sy:['냉동고 내 결빙 두껍게 쌓임'],ch:['냉동고 내부 육안 확인'],ac:['수동 제상 실시 (제품 임시 이동 후 전원 유지 상태로 도어 오픈)'],w:null},
+]},
+'TC4-l':{pat:'TC4 낮음 — 증발기 출구 과냉',color:'#b87cf5',sum:'R-170 과충전',causes:[
+  {t:'R-170 냉매 과충전',p:'h',sy:['TC4 -85°C 이하','TC3도 함께 낮아짐','흡입 배관 착상 심화'],ch:['충전량 재확인 (100~110g)'],ac:['소량 회수 후 TC4 재측정'],w:null},
+]},
+'TC6-h':{pat:'TC6 높음 — 2nd 흡입 과열',color:'#ff4444',sum:'TC10 이상 연쇄 또는 2nd 냉매 부족',causes:[
+  {t:'TC10 상승으로 인한 2nd 흡입 과열',p:'h',sy:['TC6·TC10 동시 상승','Temp-Out 발생 가능','State = PROTECTION[3]'],ch:['TC10 현재값 확인 (정상: -45~-25°C)','이벤트 로그 Temp-Out 기록'],ac:['도어 오픈 최소화','과부하 제거','HX 오염 시 냉매 회수 후 플러싱'],w:null},
+  {t:'2nd 냉매 부족 (R-170 누설)',p:'h',sy:['TC6 상승 + TC4 상승'],ch:['가스감지기 2nd 배관 누설 탐지'],ac:['누설 수리 후 R-170 재충전'],w:null},
+]},
+'TC6-l':{pat:'TC6 낮음 — 2nd 흡입 과냉',color:'#b87cf5',sum:'과충전 또는 캐필러리 이상',causes:[
+  {t:'R-170 과충전 또는 캐필러리 이상',p:'m',sy:['TC6 -50°C 이하'],ch:['충전량 재확인','TC3·TC4 동시 확인'],ac:['소량 회수 후 재측정'],w:null},
+]},
+'TC7-h':{pat:'TC7 높음 — 응축기 출구 고온',color:'#f5bc1a',sum:'1st 응축 불량 — 팬 불량 / 핀코일 오염',causes:[
+  {t:'응축기 팬 불량 또는 핀코일 막힘',p:'h',sy:['Dashboard Fan Speed = 0 RPM','Fan Low RPM Warning 경보'],ch:['Dashboard Fan - Condenser Fan Speed 확인','핀코일 오염도 육안 확인','서비스 모드 팬 테스트'],ac:['팬 모터 교체 (AFL2525HW-00, 24VDC)','핀코일 에어 블로우 청소'],w:null},
+  {t:'외기 온도 과도 상승',p:'m',sy:['TC2도 함께 높음','Extreme Ambient Caution 발생'],ch:['TC2 현재값 확인','설치 공간 온도 측정'],ac:['설치 환경 개선'],w:null},
+]},
+'TC7-l':{pat:'TC7 낮음 — 응축기 출구 저온',color:'#2eb8f5',sum:'1st 냉매 부족',causes:[
+  {t:'1st Stage 냉매 부족 (R-290 누설)',p:'h',sy:['TC7 낮음 + TC1 높음','TC8 과열'],ch:['TC1·TC7·TC8 동시 확인','가스감지기 누설 탐지'],ac:['누설 수리 후 R-290 재충전'],w:'R-290 가연성 주의'},
+]},
+'TC8-h':{pat:'TC8 높음 — 1st 압축기 과열',color:'#ff4444',sum:'응축 불량 / 냉매 부족 / 압축기 내부 불량',causes:[
+  {t:'응축기 냉각 불량으로 인한 압축기 과열',p:'h',sy:['TC8 80°C 초과','TC7(Liquid Line) 높음','Fan Low RPM 경보'],ch:['팬 RPM 확인','핀코일 오염도 확인','TC2·TC7·TC8 동시 분석'],ac:['팬 점검 및 교체','핀코일 청소'],w:null},
+  {t:'1st Stage 냉매 부족',p:'h',sy:['TC8 과열 + TC1 과열','TC7 낮음'],ch:['가스감지기 누설 탐지'],ac:['누설 수리 후 재충전'],w:null},
+  {t:'1st 압축기 내부 불량 (밸브 마모)',p:'m',sy:['TC8 90°C 이상','냉동고 온도 급격 상승','압축기 이상 소음','Stage 1 Failure 경보'],ch:['운전 전류 측정 (정격 대비 감소)','서비스 모드 1st RPM 확인'],ac:['1st 압축기 교체','POE32 오일 교환 (320ml)','필터드라이어 교체 후 진공·재충전'],w:'교체 오일: 1st = POE 32 (320ml) — AB 오일과 절대 혼합 금지'},
+]},
+'TC8-l':{pat:'TC8 낮음 — 1st 압축기 미가동',color:'#2eb8f5',sum:'Stage 1 미가동 상태',causes:[
+  {t:'1st Stage 압축기 미가동',p:'m',sy:['TC8 상온 근처','Stage 1 Failure 경보 가능','LED: 빨간 LED 꺼짐'],ch:['이벤트 로그 Stage 1 Failure 확인','알고리즘 State 확인 (서비스 모드)'],ac:['Stage 1 Failure Error Code 기반 원인 분석'],w:null},
+]},
+'TC9-h':{pat:'TC9 높음 — 2nd 압축기 과열',color:'#ff4444',sum:'Compressor Temperature Caution (경보 기준: 94°C)',causes:[
+  {t:'2nd 압축기 과부하 (냉매·환경 이상)',p:'h',sy:['TC9 90°C 이상 → Compressor Temperature Caution','냉동고 온도 상승','TC6(2nd Suction) 과열'],ch:['Dashboard TC9 현재값 확인 (94°C=경보)','이벤트 로그 Compressor Temperature Caution','TC6 동시 확인'],ac:['2nd 냉매 충전량·누설 확인','설치 환경 개선 (외기 온도, 도어 오픈 빈도)'],w:null},
+  {t:'2nd 압축기 내부 불량',p:'m',sy:['TC9 매우 높음','Stage 2 Failure 경보'],ch:['2nd RPM 확인 (서비스 모드)','운전 전류 측정 (정격 대비 감소)'],ac:['2nd 압축기 교체','AB 오일 교환 (모델별 320~444ml)','필터드라이어(75380H01) 교체','진공 후 R-170 재충전'],w:'교체 오일: 2nd = AB (320~444ml) — POE 오일과 절대 혼합 금지'},
+]},
+'TC9-l':{pat:'TC9 낮음 — 섬프 온도 비정상 저하',color:'#2eb8f5',sum:'정상 사이클 오프 (가장 흔함) / 2nd 미가동 / 센서 이상',causes:[
+  {t:'정상 사이클 오프 상태 (가장 흔한 원인)',p:'h',sy:['TC9 낮음 (압축기 정지 중 — 열 없음)','RPM1·Fan 모두 0 RPM','RTD1이 설정값 근처에서 안정 (예: -79.5°C @ -80°C 설정)'],ch:['RTD1 값 확인 — 설정값 ±2°C 이내면 정상 사이클링','5~10분 대기 후 RPM1 변화 관찰 (압축기 재기동 여부)','TC9 -50°C 이하 비현실적이면 센서 이상 의심'],ac:['RTD1 정상이면 관찰만 — 사이클 오프 중 TC9 낮음은 정상 현상','TC9 -50°C 이하 비현실적 수치면 TC9 센서 점검'],w:null},
+  {t:'2nd Stage 미가동 (Temp-Out 또는 Stage 2 Failure)',p:'h',sy:['TC9 낮음 지속 (재기동 안 됨)','이벤트 로그에 Temp-Out 또는 Stage 2 Failure 기록','LED: 빨간 LED 점멸 = 1st만 가동 중'],ch:['이벤트 로그 Error Code 확인','TC10 현재값 확인','LED 상태 확인'],ac:['Temp-Out이면 → 도어·과부하 제거 후 TC10 < -40°C 복귀 대기','Stage 2 Failure이면 → Error Code 기반 원인별 조치'],w:null},
+  {t:'TC9 센서 불량 (낮은 방향 오류)',p:'m',sy:['TC9 -50°C 이하 비현실적 수치','2nd 압축기 가동 소음·진동은 정상','이벤트 로그 TC9 Failure Caution'],ch:['2nd 압축기 작동 소음·진동 촉각 확인','TC9 저항값 측정'],ac:['TC9 교체 (315204H09 · White)','교체 후 Caution 해제 확인'],w:null},
+]},
+'TC10-h':{pat:'TC10 높음 — 캐스케이드HX 온도 상승',color:'#ff4444',sum:'> 10°C 시 Temp-Out → 2nd Stage 자동 정지',causes:[
+  {t:'도어 과도 오픈 / 과부하 (일시적 상승)',p:'h',sy:['TC10 > -10°C','도어 오픈 이력 또는 따뜻한 제품 대량 투입','알고리즘 State = PROTECTION[3]'],ch:['이벤트 로그 Temp-Out 기록 확인','도어 오픈 횟수·시간 확인','TC10 알고리즘 조건: < -40°C AND TC1 < 0°C = 정상 가동 복귀'],ac:['도어 최소화','과부하 제거','TC10 < -40°C 복귀 후 자동 재시작'],w:null},
+  {t:'2nd 냉각 불량으로 HX 냉각 안 됨',p:'h',sy:['TC10 서서히 상승','TC6(2nd Suction) 과열','냉동고 온도 상승'],ch:['TC3·TC4·TC6·TC10 동시 분석','2nd 냉매 누설 점검'],ac:['2nd 계통 이상 원인 해결','R-170 재충전'],w:null},
+  {t:'Heat Exchange Probe Failure (TC10 센서 불량)',p:'m',sy:['Heat Exchange Probe Failure Warning 경보','TC10 비현실적 수치'],ch:['Heat Exchange Probe Failure Warning 이벤트 확인','백업 TC10 센서 자동 전환 여부'],ac:['백업 TC10 연결 확인 (내장 백업 자동 전환)','양쪽 모두 불량이면 Heat Exchange Box 전체 교체'],w:'TC10은 단독 교체 불가 — Heat Exchange Box 통째 교체 필요'},
+]},
+'TC10-l':{pat:'TC10 낮음 — HX 과냉',color:'#b87cf5',sum:'1st 과충전 가능 (대부분 큰 문제 없음)',causes:[
+  {t:'1st Stage 냉매 과충전',p:'m',sy:['TC10 -55°C 이하','TC1도 낮을 수 있음'],ch:['TC1·TC10 동시 확인','1st 냉매 충전량 확인'],ac:['R-290 소량 회수 후 재측정'],w:null},
+]},
+'RTD1-h':{pat:'RTD1 높음 — 냉동고 온도 설정값 초과',color:'#ff4444',sum:'High Temperature Warning 조건',causes:[
+  {t:'도어 오픈 / 과부하로 인한 일시적 온도 상승',p:'h',sy:['High Temperature Warning 발생','도어 오픈 또는 따뜻한 제품 투입 후'],ch:['TC4(Evap Outlet) 확인 — 낮으면 회복 중','이벤트 로그 High Temperature Warning 시각 확인'],ac:['도어 닫힘 확인','30~60분 회복 대기','회복 안 되면 냉동 계통 점검'],w:null},
+  {t:'냉동 시스템 이상으로 인한 지속 온도 상승',p:'h',sy:['RTD1 지속 상승 (회복 안 됨)','TC4도 높음','압축기 가동 중인데 온도 안 내려감'],ch:['TC3·TC4·TC6·TC10 전체 확인','Stage 1/2 Failure 경보 여부'],ac:['이 도구 TC 온도 탭에서 이상 TC 선택해 원인 추적'],w:null},
+  {t:'RTD1 센서 불량',p:'m',sy:['Control Probe Failure Warning 경보','RTD1 비현실적 수치'],ch:['Control Probe Failure Warning 이벤트 확인','RTD1 저항값 측정 (0°C=1000Ω, -80°C≈683Ω)'],ac:['RTD1 교체 (333541H01 · Red/White)'],w:null},
+]},
+'RTD1-l':{pat:'RTD1 낮음 — 냉동고 온도 설정값 이하',color:'#2eb8f5',sum:'Low Temperature Warning 조건',causes:[
+  {t:'설정값·오프셋 이상',p:'m',sy:['Low Temperature Warning 발생'],ch:['현재 Setpoint 확인 (Settings > Controls)','Temperature Offset 확인'],ac:['Setpoint·Offset 재설정','Factory Reset 검토 (Files and Info)'],w:null},
+  {t:'RTD1 센서 불량',p:'m',sy:['Control Probe Failure Warning','비현실적 저온 표시'],ch:['RTD1 저항값 측정'],ac:['RTD1 교체 (333541H01)'],w:null},
+]},
+};
+
+// 냉매압 DB
+const PREF={
+  1:{hp:{n:'120~200 PSIG',u:'200 PSIG 초과',d:'120 PSIG 미만'},lp:{n:'0~30 PSIG',u:'30 PSIG 초과',d:'0 PSIG 미만(진공)'}},
+  2:{hp:{n:'150~240 PSIG',u:'240 PSIG 초과',d:'150 PSIG 미만'},lp:{n:'10~30 PSIG',u:'30 PSIG 초과',d:'10 PSIG 미만'}},
+};
+const P_DB={
+  1:{
+  'u-u':{pat:'고압↑ + 저압↑',color:'#ff6b35',sum:'냉매 과충전 또는 응축 불량',causes:[
+    {t:'응축기 팬 불량 / 핀코일 막힘',p:'h',sy:['팬 소음 이상 또는 정지','응축기 주변 과열','냉동고 온도 서서히 상승'],ch:['Dashboard Fan Speed 확인','핀코일 오염 육안 점검','서비스 모드 팬 테스트'],ac:['팬 모터 교체 (AFL2525HW-00, 24VDC)','핀코일 에어 블로우 청소'],w:null},
+    {t:'R-290 냉매 과충전',p:'m',sy:['충전 직후 또는 보충 후 발생','액관에 기포 없음'],ch:['명판 충전량 확인 (R290 59~63g)','저울로 실제 충전량 측정'],ac:['소량 회수 후 재측정'],w:null},
+    {t:'설치 환경 고온 (외기 45°C 초과)',p:'l',sy:['TC2도 높음 (37°C 초과)'],ch:['설치 공간 온도 측정'],ac:['환기 개선','에어컨 또는 차광 조치'],w:null},
+  ]},
+  'u-d':{pat:'고압↑ + 저압↓',color:'#b87cf5',sum:'캐필러리 막힘 (가장 유력)',causes:[
+    {t:'캐필러리 막힘 (수분 결빙 / 이물질)',p:'h',sy:['캐필러리 입구 결빙·착상','필터드라이어 결빙 (만지면 차가움)','고압 급등 + 저압 진공','냉동고 온도 급격 상승'],ch:['필터드라이어 표면 온도 확인','사이트글라스 색상 (황색=수분 포화)','캐필러리 전후 온도차 확인'],ac:['필터드라이어 즉시 교체','캐필러리 질소 플러싱','500 micron 이하 진공 후 냉매 재충전'],w:'냉매 계통 개방 시 반드시 회수 후 작업. R-290 가연성 — 환기 필수'},
+  ]},
+  'u-n':{pat:'고압↑ + 저압 정상',color:'#f5bc1a',sum:'응축 계통 문제 (냉매량 정상)',causes:[
+    {t:'응축기 팬 부분 불량 / 오염',p:'h',sy:['고압만 단독 상승','냉동고 온도 서서히 상승'],ch:['팬 RPM 확인','핀코일 오염'],ac:['팬 점검 및 교체','핀코일 청소'],w:null},
+    {t:'불응축 가스 혼입 (공기)',p:'m',sy:['고압이 P-T 예상치보다 높음','냉매 충전량은 정상'],ch:['진공 작업 이력 확인 (불충분 진공 → 공기 혼입)'],ac:['냉매 전량 회수','500 micron 이하 충분한 진공 후 재충전'],w:null},
+  ]},
+  'd-d':{pat:'고압↓ + 저압↓',color:'#2eb8f5',sum:'냉매 부족 — R-290 누설 강력 의심',causes:[
+    {t:'R-290 냉매 누설',p:'h',sy:['응축기 방열 감소 (덜 따뜻함)','압축기 운전 전류 감소','배관 이음부 오일 자국','냉동고 온도 서서히 상승'],ch:['HC 가스감지기 전체 배관 탐지','이음부·용접부·서비스 포트 캡 점검','오일 자국 육안 확인'],ac:['누설 부위 확인 및 수리','R-290 재충전 (목표: 고압 120~200 PSIG)','수리 후 24시간 압력 유지 확인'],w:'R-290(프로판) LPG와 동일 성분 가연성! 점화원 차단·환기 필수'},
+    {t:'초기 충전량 부족',p:'m',sy:['신규 충전 또는 수리 직후 발생'],ch:['명판 충전량 (R290 59~63g) 대비 실제 충전량 확인'],ac:['명판 기준으로 냉매 보충','충전 후 30분 안정 후 재측정'],w:null},
+  ]},
+  'd-u':{pat:'고압↓ + 저압↑',color:'#b87cf5',sum:'압축기 내부 불량 — 밸브 마모',causes:[
+    {t:'1st 압축기 토출 밸브 마모·손상',p:'h',sy:['압축기 본체 과열 (TC8 높음)','냉동고 온도 급격 상승','압축기 운전 전류 감소','압축기 이상 소음'],ch:['TC8 현재값 확인 (과열)','운전 전류 측정 (정격 대비 감소)','고압/저압 압력비 — 정상 대비 현저히 낮으면 압축 불량'],ac:['1st 압축기 교체','POE32 오일 동시 교환 (320ml)','필터드라이어 교체','진공 후 R-290 재충전 (59~63g)'],w:'교체 오일: 1st = POE 32 (320ml) — AB 오일과 절대 혼합 금지'},
+  ]},
+  'd-n':{pat:'고압↓ + 저압 정상',color:'#2eb8f5',sum:'압축 효율 저하 초기 또는 경미한 냉매 부족',causes:[
+    {t:'압축기 효율 저하 초기',p:'m',sy:['냉동고 온도가 설정값에서 약간 이탈','압축기 운전 사이클 길어짐'],ch:['운전 전류 추이 모니터링','TC8 온도 추이 확인'],ac:['주 1회 압력 기록 모니터링','악화 시 압축기 교체 준비'],w:null},
+    {t:'경미한 냉매 부족 (극소량 누설)',p:'m',sy:['고압만 약간 낮음'],ch:['가스감지기 정밀 누설 점검'],ac:['누설 없으면 소량 보충','누설 있으면 수리 후 충전'],w:null},
+  ]},
+  'n-u':{pat:'고압 정상 + 저압↑',color:'#f5bc1a',sum:'어큐뮬레이터 불량 또는 과충전 초기',causes:[
+    {t:'어큐뮬레이터 기능 저하',p:'h',sy:['압축기 흡입측 액냉매 유입 소음','저압 비정상 상승','TC1 비정상 저하'],ch:['어큐뮬레이터 결빙·착상 확인','흡입 배관 온도 (비정상 저온=액 유입)'],ac:['어큐뮬레이터 교체','냉매 충전량 재확인'],w:'액압축 방치 시 압축기 즉각 파손'},
+    {t:'냉매 과충전 초기',p:'m',sy:['저압만 약간 상승'],ch:['충전량 재확인 (59~63g)'],ac:['소량 회수 후 재측정'],w:null},
+  ]},
+  'n-d':{pat:'고압 정상 + 저압↓',color:'#2eb8f5',sum:'캐필러리 부분 막힘 초기',causes:[
+    {t:'캐필러리 부분 막힘 초기',p:'h',sy:['고압 정상, 저압만 낮음','필터드라이어 약한 결빙'],ch:['필터드라이어 사이트글라스 색상','캐필러리 입구 온도 (결빙 여부)'],ac:['필터드라이어 선제 교체','개선 없으면 캐필러리 질소 플러싱'],w:null},
+  ]},
+  },
+  2:{
+  'u-u':{pat:'고압↑ + 저압↑',color:'#ff6b35',sum:'냉매 과충전 또는 캐스케이드HX 이상',causes:[
+    {t:'R-170 냉매 과충전',p:'h',sy:['흡입 배관 비정상 결빙','냉동고 온도 오히려 상승'],ch:['R-170 충전량 확인 (100~110g)','충전 이력 확인'],ac:['소량 회수 후 재측정 (목표: 고압 150~240 PSIG, 저압 10~30 PSIG)'],w:'R-170 가연성 — 소량 과충전도 시스템에 즉각 영향'},
+    {t:'캐스케이드HX(TC10) 열교환 불량',p:'h',sy:['TC10 온도 비정상','2nd 고압 상승 (응축 불량)','1st Stage 압력도 이상'],ch:['TC10 확인 (-45~-25°C 정상)','HX 표면 오일 오염 여부','1st Stage 압력 동시 확인'],ac:['HX 표면 청소','오염 심하면 냉매 회수 후 플러싱'],w:null},
+  ]},
+  'u-d':{pat:'고압↑ + 저압↓',color:'#b87cf5',sum:'2nd 캐필러리 막힘 (가장 유력)',causes:[
+    {t:'캐필러리 막힘 (332957H01)',p:'h',sy:['냉동고 -86°C 유지 불가','캐필러리 입구 결빙','고압 급등 + 저압 진공'],ch:['캐필러리 전후 결빙 확인','필터드라이어(75380H01) 색상·결빙 확인'],ac:['필터드라이어(75380H01) 교체','캐필러리 질소 플러싱','500 micron 이하 진공 후 R-170 재충전'],w:'R-170 배관 개방 시 즉시 기화 (-89°C 비등점) — 극저온 보호장갑 필수. 가연성 주의'},
+  ]},
+  'u-n':{pat:'고압↑ + 저압 정상',color:'#f5bc1a',sum:'캐스케이드HX 부분 오염 또는 오일분리기 불량',causes:[
+    {t:'캐스케이드HX 오일 오염',p:'h',sy:['2nd 고압만 상승','1st 압력 정상','냉동고 온도 서서히 상승'],ch:['TC10 확인','HX 오일 오염 여부','오일분리기 정상 작동 여부'],ac:['HX 표면 청소','오염 심하면 냉매 회수 후 플러싱'],w:null},
+    {t:'오일분리기(328956H01) 불량',p:'m',sy:['오일 과다 순환으로 HX 오염','고압 상승'],ch:['오일 레벨 확인 (AB 오일, 320~444ml)','플로트 밸브 작동 여부'],ac:['오일분리기 점검 및 교체 (328956H01)','AB 오일 레벨 재조정'],w:null},
+  ]},
+  'd-d':{pat:'고압↓ + 저압↓',color:'#2eb8f5',sum:'R-170 냉매 부족 — 누설',causes:[
+    {t:'R-170 냉매 누설',p:'h',sy:['냉동고 온도 급격 상승 (2nd가 직접 냉각 — 즉시 영향)','Evaporator Tube 착상 감소','압축기 전류 감소','오일 자국'],ch:['HC 가스감지기 전체 배관 점검','캐스케이드HX 연결부 중점 점검','서비스 포트 캡 상태'],ac:['누설 부위 수리','R-170 재충전 (100~110g 정밀 저울 측정)','충전 후 고압 150~240 PSIG 확인'],w:'R-170 가연성+극저온 — 폭발방지형 감지기 필수. 밀폐 공간 절대 금지'},
+  ]},
+  'd-u':{pat:'고압↓ + 저압↑',color:'#b87cf5',sum:'2nd 압축기 내부 불량',causes:[
+    {t:'2nd 압축기 토출 밸브 마모',p:'h',sy:['압축기 본체 과열 (TC9 높음)','냉동고 온도 급격 상승','운전 전류 감소','이상 소음'],ch:['TC9 현재값 확인 (과열)','운전 전류 측정','고압/저압 압력비 확인'],ac:['2nd 압축기 교체','AB 오일 동시 교환 (320~444ml)','필터드라이어(75380H01) 교체','진공 후 R-170 재충전 (100~110g)'],w:'교체 오일: 2nd = AB (320~444ml) — POE 오일과 절대 혼합 금지'},
+  ]},
+  'd-n':{pat:'고압↓ + 저압 정상',color:'#2eb8f5',sum:'2nd 압축 효율 저하 초기',causes:[
+    {t:'2nd 압축기 효율 저하 초기',p:'m',sy:['냉동고 -86°C 유지 어려움 (예: -75°C 수준)'],ch:['TC9·전류 추이 모니터링'],ac:['주 1회 압력 기록 모니터링','악화 시 2nd 압축기 교체 준비'],w:null},
+    {t:'오일분리기 플로트 밸브 불량',p:'m',sy:['압축기 오일 레벨 낮음'],ch:['AB 오일 레벨 확인 (320~444ml)'],ac:['오일분리기 점검 (328956H01)','오일 레벨 보충'],w:null},
+  ]},
+  'n-u':{pat:'고압 정상 + 저압↑',color:'#f5bc1a',sum:'Evaporator Tube 착상 과다 또는 과충전',causes:[
+    {t:'Evaporator Tube 착상 과다',p:'h',sy:['저압 상승 (증발 공간 감소)','냉동고 내 결빙 두꺼움','냉각 효율 저하'],ch:['착상 두께 확인','도어 씰 점검 (습기 유입 여부)'],ac:['수동 제상(Defrost) 실시','도어 씰 교체','착상 원인 제거 후 재확인'],w:null},
+    {t:'R-170 과충전',p:'m',sy:['저압 상승','흡입 배관 결빙'],ch:['충전량 재확인'],ac:['소량 회수 후 재측정'],w:null},
+  ]},
+  'n-d':{pat:'고압 정상 + 저압↓',color:'#2eb8f5',sum:'2nd 캐필러리 부분 막힘 초기',causes:[
+    {t:'캐필러리 부분 막힘 초기',p:'h',sy:['고압 정상, 저압만 낮음','캐필러리 입구 약한 결빙'],ch:['필터드라이어(75380H01) 색상 확인','캐필러리 입구 온도 확인'],ac:['필터드라이어 선제 교체 (75380H01)','개선 없으면 캐필러리 질소 플러싱'],w:null},
+  ]},
+  },
+};
+
+/* ══════════════════════════════════════
+   TC 탭 로직
+══════════════════════════════════════ */
+let selTc='', selState='', tcOpenIdx=-1;
+
+// TC 선택 버튼 렌더링
+(function buildTcGrid(){
+  const g=document.getElementById('tc-pick-grid');
+  TCS.forEach(tc=>{
+    const d=document.createElement('div');
+    d.className='pick-item';d.dataset.id=tc.id;
+    d.innerHTML=`<div class="pick-item-id">${tc.id}</div>
+      <div class="pick-item-name">${tc.name}</div>
+      <div class="pick-item-norm">${tc.norm}</div>`;
+    d.onclick=()=>pickTc(tc.id);
+    g.appendChild(d);
+  });
+})();
+
+function pickTc(id){
+  selTc=id; selState=''; tcOpenIdx=-1;
+  document.querySelectorAll('.pick-item').forEach(el=>el.classList.toggle('sel',el.dataset.id===id));
+  const tc=TCS.find(t=>t.id===id);
+  const sa=document.getElementById('tc-state-area');
+  document.getElementById('tc-state-header').textContent=`${id} — ${tc.name} (정상: ${tc.norm})`;
+  const sb=document.getElementById('tc-state-btns');
+  sb.innerHTML='';
+  [['h','▲','up',tc.h],['n','●','nrm',tc.n],['l','▼','dn',tc.l]].forEach(([k,ic,cls,v])=>{
+    const b=document.createElement('button');
+    b.className=`state-btn ${cls}`;b.dataset.s=k;
+    b.innerHTML=`<span class="ic">${ic}</span><span>${v.l}<span class="sh">${v.h}</span></span>`;
+    b.onclick=()=>pickTcState(k);
+    sb.appendChild(b);
+  });
+  sa.classList.add('show');
+  document.getElementById('tc-result').innerHTML='<div class="no-pick" style="padding:16px 0">현재 온도 상태를 선택하세요</div>';
+  document.getElementById('tc-rst').style.display='block';
+}
+
+function pickTcState(s){
+  selState=s; tcOpenIdx=0;
+  document.querySelectorAll('.state-btn').forEach(b=>b.classList.toggle('on',b.dataset.s===s));
+  if(s==='n'){
+    document.getElementById('tc-result').innerHTML=`<div class="ok-msg"><div class="ok-icon">✓</div><div class="ok-text">${selTc} 정상 범위입니다</div><div class="ok-sub">다른 TC를 선택하거나<br>다른 증상을 확인해보세요</div></div>`;
+    return;
+  }
+  renderTcResult();
+}
+
+function renderTcResult(){
+  const key=`${selTc}-${selState}`;
+  const d=TC_DB[key];
+  const tc=TCS.find(t=>t.id===selTc);
+  const el=document.getElementById('tc-result');
+  if(!d){el.innerHTML='<div class="no-pick">해당 조합 데이터 없음</div>';return;}
+  let h=`<div class="pat-badge" style="background:${d.color}20;border:1px solid ${d.color}50;color:${d.color}">${d.pat}</div>
+    <div class="sum-text">${d.sum}</div>`;
+  d.causes.forEach((c,i)=>{
+    const pl=c.p==='h'?'가능성 높음':c.p==='m'?'가능성 중간':'가능성 낮음';
+    const isOpen=i===tcOpenIdx;
+    h+=`<div class="cause-card">
+      <div class="cause-hdr${isOpen?' open':''}" onclick="togTc(this,${i})">
+        <span class="prob ${c.p}">${pl}</span>
+        <span class="cause-title">${c.t}</span>
+        <span class="cause-arr">▼</span>
+      </div>
+      <div class="cause-body${isOpen?' open':''}">
+        <div class="cause-inner">
+          <div class="sub-label">동반 증상</div>`;
+    c.sy.forEach(s=>{h+=`<div class="item-li"><span class="dot" style="background:#f5bc1a"></span><span>${s}</span></div>`;});
+    h+=`<div class="sub-label">현장 확인 포인트</div>`;
+    c.ch.forEach(s=>{h+=`<div class="item-li"><span class="dot" style="background:#1ecfb8"></span><span>${s}</span></div>`;});
+    h+=`<div class="sub-label">조치 순서</div>`;
+    c.ac.forEach((a,j)=>{h+=`<div class="act-item"><span class="act-n">${j+1}</span>${a}</div>`;});
+    if(c.w)h+=`<div class="warn-box">⚠ ${c.w}</div>`;
+    h+=`</div></div></div>`;
+  });
+  h+=`<div class="note-box"><strong>${tc.id} — ${tc.name}</strong><br>
+    정상범위: <span class="nm grn">${tc.norm}</span><br>
+    <span style="font-size:9px">매뉴얼 333481H01 RevC (04/17/2025) Table 13 기준</span></div>`;
+  el.innerHTML=h;
+}
+
+function togTc(hdr,idx){
+  const body=hdr.nextElementSibling;
+  const isOpen=body.classList.contains('open');
+  document.querySelectorAll('#tc-result .cause-body').forEach(b=>b.classList.remove('open'));
+  document.querySelectorAll('#tc-result .cause-hdr').forEach(h=>h.classList.remove('open'));
+  if(!isOpen){body.classList.add('open');hdr.classList.add('open');tcOpenIdx=idx;}
+  else tcOpenIdx=-1;
+}
+
+function tcReset(){
+  selTc='';selState='';tcOpenIdx=-1;
+  document.querySelectorAll('.pick-item').forEach(el=>el.classList.remove('sel'));
+  document.getElementById('tc-state-area').classList.remove('show');
+  document.getElementById('tc-result').innerHTML='<div class="no-pick"><div class="big">↑</div>TC 센서를 선택하고<br>현재 온도 상태를 선택하세요</div>';
+  document.getElementById('tc-rst').style.display='none';
+}
+
+/* ══════════════════════════════════════
+   냉매압 탭 로직
+══════════════════════════════════════ */
+let pStage=0, pHp='', pLp='', pOpenIdx=-1;
+
+function setStage(s){
+  pStage=s;pHp='';pLp='';pOpenIdx=0;
+  document.getElementById('s1-btn').classList.toggle('on',s===1);
+  document.getElementById('s2-btn').classList.toggle('on',s===2);
+  document.querySelectorAll('.p-btn').forEach(b=>b.classList.remove('on'));
+  const ref=PREF[s];
+  document.getElementById('hp-u-h').textContent=ref.hp.u;
+  document.getElementById('hp-n-h').textContent=ref.hp.n;
+  document.getElementById('hp-d-h').textContent=ref.hp.d;
+  document.getElementById('lp-u-h').textContent=ref.lp.u;
+  document.getElementById('lp-n-h').textContent=ref.lp.n;
+  document.getElementById('lp-d-h').textContent=ref.lp.d;
+  document.getElementById('p-sel-grid').style.display='grid';
+  document.getElementById('p-result').innerHTML='<div class="no-pick" style="padding:16px 0">고압과 저압 상태를 모두 선택하세요</div>';
+  document.getElementById('p-rst').style.display='block';
+}
+
+function setP(which,val){
+  if(!pStage)return;
+  if(which==='hp')pHp=val;else pLp=val;
+  document.querySelectorAll(`#hp-u,#hp-n,#hp-d`).forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll(`#lp-u,#lp-n,#lp-d`).forEach(b=>b.classList.remove('on'));
+  if(pHp)document.getElementById(`hp-${pHp}`).classList.add('on');
+  if(pLp)document.getElementById(`lp-${pLp}`).classList.add('on');
+  if(pHp&&pLp)renderPResult();
+}
+
+function renderPResult(){
+  const key=`${pHp}-${pLp}`;
+  const d=P_DB[pStage]?.[key];
+  const ref=PREF[pStage];
+  const el=document.getElementById('p-result');
+  if(pHp==='n'&&pLp==='n'){
+    el.innerHTML=`<div class="ok-msg"><div class="ok-icon">✓</div><div class="ok-text">정상 압력 범위</div><div class="ok-sub">고압 ${ref.hp.n} · 저압 ${ref.lp.n}</div></div>`;
+    return;
+  }
+  if(!d){el.innerHTML='<div class="no-pick">해당 조합 데이터 없음</div>';return;}
+  const sColor=pStage===1?'#ff6b35':'#2eb8f5';
+  const sLabel=pStage===1?'1st Stage — R-290':'2nd Stage — R-170';
+  const hpState=pHp==='u'?'▲ 이상 상승':pHp==='d'?'▼ 이상 저하':'● 정상';
+  const lpState=pLp==='u'?'▲ 이상 상승':pLp==='d'?'▼ 이상 저하':'● 정상';
+  let h=`<div style="display:inline-block;font-size:10px;font-weight:800;padding:3px 10px;border-radius:10px;margin-bottom:8px;background:${sColor}20;color:${sColor}">${sLabel}</div>
+    <div class="pat-badge" style="background:${d.color}20;border:1px solid ${d.color}50;color:${d.color}">${d.pat}</div>
+    <div class="sum-text">${d.sum}</div>
+    <div class="gauge-strip">
+      <div class="gauge-card hp">
+        <div class="gc-label">고압 (토출측)</div>
+        <div class="gc-state ${pHp}">${hpState}</div>
+        <div class="gc-norm">정상: <span class="nm red">${ref.hp.n}</span></div>
+      </div>
+      <div class="gauge-card lp">
+        <div class="gc-label">저압 (흡입측)</div>
+        <div class="gc-state ${pLp}">${lpState}</div>
+        <div class="gc-norm">정상: <span class="nm blu">${ref.lp.n}</span></div>
+      </div>
+    </div>`;
+  d.causes.forEach((c,i)=>{
+    const pl=c.p==='h'?'가능성 높음':c.p==='m'?'가능성 중간':'가능성 낮음';
+    const isOpen=i===pOpenIdx;
+    h+=`<div class="cause-card">
+      <div class="cause-hdr${isOpen?' open':''}" onclick="togP(this,${i})">
+        <span class="prob ${c.p}">${pl}</span>
+        <span class="cause-title">${c.t}</span>
+        <span class="cause-arr">▼</span>
+      </div>
+      <div class="cause-body${isOpen?' open':''}">
+        <div class="cause-inner">
+          <div class="sub-label">동반 증상</div>`;
+    c.sy.forEach(s=>{h+=`<div class="item-li"><span class="dot" style="background:#f5bc1a"></span><span>${s}</span></div>`;});
+    h+=`<div class="sub-label">현장 확인 포인트</div>`;
+    c.ch.forEach(s=>{h+=`<div class="item-li"><span class="dot" style="background:#1ecfb8"></span><span>${s}</span></div>`;});
+    h+=`<div class="sub-label">조치 순서</div>`;
+    c.ac.forEach((a,j)=>{h+=`<div class="act-item"><span class="act-n">${j+1}</span>${a}</div>`;});
+    if(c.w)h+=`<div class="warn-box">⚠ ${c.w}</div>`;
+    h+=`</div></div></div>`;
+  });
+  h+=`<div class="note-box"><strong>${pStage}st Stage 참고 압력</strong><br>
+    고압 정상: <span class="nm red">${ref.hp.n}</span><br>
+    저압 정상: <span class="nm blu">${ref.lp.n}</span><br>
+    <span style="font-size:9px">* 수치는 참고값 — 외기·부하 조건에 따라 변동됨</span></div>`;
+  el.innerHTML=h;
+}
+
+function togP(hdr,idx){
+  const body=hdr.nextElementSibling;
+  const isOpen=body.classList.contains('open');
+  document.querySelectorAll('#p-result .cause-body').forEach(b=>b.classList.remove('open'));
+  document.querySelectorAll('#p-result .cause-hdr').forEach(h=>h.classList.remove('open'));
+  if(!isOpen){body.classList.add('open');hdr.classList.add('open');pOpenIdx=idx;}
+  else pOpenIdx=-1;
+}
+
+function pReset(){
+  pStage=0;pHp='';pLp='';pOpenIdx=-1;
+  document.getElementById('s1-btn').classList.remove('on');
+  document.getElementById('s2-btn').classList.remove('on');
+  document.querySelectorAll('.p-btn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('p-sel-grid').style.display='none';
+  document.getElementById('p-result').innerHTML='<div class="no-pick"><div class="big">↑</div>1st / 2nd Stage를 선택하고<br>고압·저압 상태를 선택하세요</div>';
+  document.getElementById('p-rst').style.display='none';
+}
+
+/* ══════════════════════════════════════
+   탭 전환
+══════════════════════════════════════ */
+function switchTab(tab){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('on'));
+  document.getElementById(`sec-${tab}`).classList.add('on');
+  document.querySelectorAll('.tab-btn')[tab==='tc'?0:1].classList.add('on');
+}
+</script>
+</body>
+</html>

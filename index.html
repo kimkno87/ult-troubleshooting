@@ -309,7 +309,14 @@ html,body{
 </style>
 </head>
 <body>
+<script>
+const PASSWORD = "ult2026";
+let input = prompt("비밀번호를 입력하세요");
 
+if (input !== PASSWORD) {
+  document.body.innerHTML = "접근 권한 없음";
+}
+</script>
 <!-- ── 헤더 ── -->
 <div class="hdr">
   <span class="hdr-badge">Field Service Tool · Thermo Fisher Scientific</span>

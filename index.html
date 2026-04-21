@@ -310,6 +310,20 @@ html,body{
 </head>
 <body>
 
+<script>
+(() => {
+  const PASSWORD = "ult2026";
+  const pw = prompt("비밀번호를 입력하세요");
+
+  if (!pw || pw !== PASSWORD) {
+    document.open();
+    document.write("접근 권한 없음");
+    document.close();
+    return;
+  }
+})();
+</script>  
+  
 <!-- ── 헤더 ── -->
 <div class="hdr">
   <span class="hdr-badge">Field Service Tool · Thermo Fisher Scientific</span>

@@ -310,12 +310,45 @@ html,body{
 </head>
 <body>
 <script>
-const PASSWORD = "ult2026";
-let input = prompt("비밀번호를 입력하세요");
+(() => {
+  const PASSWORD = "ult2026";
+  const pw = prompt("비밀번호를 입력하세요");
 
-if (input !== PASSWORD) {
-  document.body.innerHTML = "접근 권한 없음";
-}
+  if (pw === PASSWORD) return;
+
+  document.open();
+  document.write(`<!doctype html>
+  <html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>접근 권한 없음</title>
+    <style>
+      body{
+        margin:0;
+        min-height:100vh;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        background:#08111f;
+        color:#cfe4f8;
+        font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+        text-align:center;
+      }
+      .box{padding:24px}
+      h2{margin:0 0 10px;font-size:22px}
+      p{margin:0;font-size:14px;color:#7a9cbd}
+    </style>
+  </head>
+  <body>
+    <div class="box">
+      <h2>접근 권한 없음</h2>
+      <p>비밀번호가 올바르지 않습니다.</p>
+    </div>
+  </body>
+  </html>`);
+  document.close();
+})();
 </script>
 <!-- ── 헤더 ── -->
 <div class="hdr">

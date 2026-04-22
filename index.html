@@ -376,13 +376,13 @@ html,body{
     <div class="ref-grid">
       <div class="ref-item"><div class="ref-id">TC1</div><div class="ref-name">1st Stage Suction</div><div class="ref-norm cool">-30 ~ -10°C</div></div>
       <div class="ref-item"><div class="ref-id">TC2</div><div class="ref-name">Condenser Air Inlet</div><div class="ref-norm warm">+15 ~ +35°C</div></div>
-      <div class="ref-item"><div class="ref-id">TC3</div><div class="ref-name">Evaporator Inlet</div><div class="ref-norm cold">-60 ~ -45°C</div></div>
+      <div class="ref-item"><div class="ref-id">TC3</div><div class="ref-name">Evaporator Inlet</div><div class="ref-norm cold">-85 ~ -95°C</div></div>
       <div class="ref-item"><div class="ref-id">TC4</div><div class="ref-name">Evaporator Outlet</div><div class="ref-norm cold">-75 ~ -60°C</div></div>
       <div class="ref-item"><div class="ref-id">TC6</div><div class="ref-name">2nd Stage Suction</div><div class="ref-norm cool">-40 ~ -20°C</div></div>
       <div class="ref-item"><div class="ref-id">TC7</div><div class="ref-name">Liquid Line</div><div class="ref-norm warm">+20 ~ +40°C</div></div>
       <div class="ref-item"><div class="ref-id">TC8</div><div class="ref-name">1st Stage Sump</div><div class="ref-norm warm">+30 ~ +60°C</div></div>
       <div class="ref-item"><div class="ref-id">TC9</div><div class="ref-name">2nd Stage Sump</div><div class="ref-norm warm">+30 ~ +70°C</div></div>
-      <div class="ref-item" style="grid-column:1/-1"><div class="ref-id">TC10</div><div class="ref-name">BPHX / Interstage HX &nbsp;|&nbsp; 알고리즘: &lt;-40°C=정상가동 / &gt;10°C=Temp-Out</div><div class="ref-norm cool">-45 ~ -25°C</div></div>
+      <div class="ref-item" style="grid-column:1/-1"><div class="ref-id">TC10</div><div class="ref-name">BPHX / Interstage HX &nbsp;|&nbsp; 알고리즘: &lt;-40°C=정상가동 / &gt;10°C=Temp-Out</div><div class="ref-norm cool">-45 ~ -35°C</div></div>
       <div class="ref-item" style="grid-column:1/-1"><div class="ref-id">RTD1</div><div class="ref-name">Control Probe (냉동고 내부 제어센서)</div><div class="ref-norm ctrl">설정값 ±2°C</div></div>
     </div>
   </div>
@@ -472,8 +472,8 @@ const TCS=[
    h:{l:'높음 (0°C 이상)',h:'0°C 이상'},n:{l:'정상',h:'-30~-10°C'},l:{l:'낮음 (-40°C 이하)',h:'-40°C 이하'}},
   {id:'TC2',name:'Condenser Air Inlet',sub:'응축기 외기 흡입',norm:'+15~+35°C',
    h:{l:'높음 (37°C 초과)',h:'Extreme Ambient 경보 조건'},n:{l:'정상',h:'+15~+35°C'},l:{l:'낮음 (0°C 이하)',h:'동절기 저온'}},
-  {id:'TC3',name:'Evaporator Inlet',sub:'증발기 입구',norm:'-60~-45°C',
-   h:{l:'높음 (-30°C 이상)',h:'-30°C 이상'},n:{l:'정상',h:'-60~-45°C'},l:{l:'낮음 (-70°C 이하)',h:'-70°C 이하'}},
+  {id:'TC3',name:'Evaporator Inlet',sub:'증발기 입구',norm:'-85~-95°C',
+   h:{l:'높음 (-75°C 이상)',h:'-75°C 이상'},n:{l:'정상',h:'-85~-95°C'},l:{l:'낮음 (-95°C 이하)',h:'-95°C 이하'}},
   {id:'TC4',name:'Evaporator Outlet',sub:'증발기 출구',norm:'-75~-60°C',
    h:{l:'높음 (-50°C 이상)',h:'-50°C 이상'},n:{l:'정상',h:'-75~-60°C'},l:{l:'낮음 (-85°C 이하)',h:'-85°C 이하'}},
   {id:'TC6',name:'2nd Stage Suction',sub:'2차 압축기 흡입',norm:'-40~-20°C',
@@ -483,9 +483,9 @@ const TCS=[
   {id:'TC8',name:'1st Stage Sump',sub:'1차 압축기 섬프',norm:'+30~+60°C',
    h:{l:'높음 (80°C 초과)',h:'80°C 초과'},n:{l:'정상',h:'+30~+60°C'},l:{l:'낮음 (+20°C 이하)',h:'압축기 미가동'}},
   {id:'TC9',name:'2nd Stage Sump',sub:'2차 압축기 섬프',norm:'+30~+70°C',
-   h:{l:'높음 (90°C 이상)',h:'경보 기준 94°C'},n:{l:'정상',h:'+30~+70°C'},l:{l:'낮음 (0°C 이하)',h:'사이클 오프 또는 미가동'}},
-  {id:'TC10',name:'BPHX / Interstage HX',sub:'캐스케이드 열교환기',norm:'-45~-25°C',
-   h:{l:'높음 (0°C 이상 → Temp-Out)',h:'> 10°C 시 2nd Stage 자동 정지'},n:{l:'정상',h:'-45~-25°C'},l:{l:'낮음 (-55°C 이하)',h:'-55°C 이하'}},
+   h:{l:'높음 (75°C 이상)',h:'경보 기준 94°C'},n:{l:'정상',h:'+30~+70°C'},l:{l:'낮음 (0°C 이하)',h:'사이클 오프 또는 미가동'}},
+  {id:'TC10',name:'BPHX / Interstage HX',sub:'캐스케이드 열교환기',norm:'-45~-35°C',
+   h:{l:'높음 (-25°C 이상)',h:'> 10°C 시 2nd Stage 자동 정지'},n:{l:'정상',h:'-45~-35°C'},l:{l:'낮음 (-55°C 이하)',h:'-55°C 이하'}},
   {id:'RTD1',name:'Control Probe',sub:'냉동고 내부 제어센서',norm:'설정값 ±2°C',
    h:{l:'높음 (설정값 초과)',h:'High Temp Warning'},n:{l:'정상',h:'설정값 ±2°C'},l:{l:'낮음 (설정값 이하)',h:'Low Temp Warning'}},
 ];
@@ -545,7 +545,7 @@ const TC_DB={
   {t:'1st Stage 압축기 미가동',p:'m',sy:['TC8 상온 근처','Stage 1 Failure 경보 가능','LED: 빨간 LED 꺼짐'],ch:['이벤트 로그 Stage 1 Failure 확인','알고리즘 State 확인 (서비스 모드)'],ac:['Stage 1 Failure Error Code 기반 원인 분석'],w:null},
 ]},
 'TC9-h':{pat:'TC9 높음 — 2nd 압축기 과열',color:'#ff4444',sum:'Compressor Temperature Caution (경보 기준: 94°C)',causes:[
-  {t:'2nd 압축기 과부하 (냉매·환경 이상)',p:'h',sy:['TC9 90°C 이상 → Compressor Temperature Caution','냉동고 온도 상승','TC6(2nd Suction) 과열'],ch:['Dashboard TC9 현재값 확인 (94°C=경보)','이벤트 로그 Compressor Temperature Caution','TC6 동시 확인'],ac:['2nd 냉매 충전량·누설 확인','설치 환경 개선 (외기 온도, 도어 오픈 빈도)'],w:null},
+  {t:'2nd 압축기 과부하 (냉매·환경 이상)',p:'h',sy:['TC9 75°C 이상 → Compressor Temperature Caution','냉동고 온도 상승','TC6(2nd Suction) 과열'],ch:['Dashboard TC9 현재값 확인 (94°C=경보)','이벤트 로그 Compressor Temperature Caution','TC6 동시 확인'],ac:['2nd 냉매 충전량·누설 확인','설치 환경 개선 (외기 온도, 도어 오픈 빈도)'],w:null},
   {t:'2nd 압축기 내부 불량',p:'m',sy:['TC9 매우 높음','Stage 2 Failure 경보'],ch:['2nd RPM 확인 (서비스 모드)','운전 전류 측정 (정격 대비 감소)'],ac:['2nd 압축기 교체','AB 오일 교환 (모델별 320~444ml)','필터드라이어(75380H01) 교체','진공 후 R-170 재충전'],w:'교체 오일: 2nd = AB (320~444ml) — POE 오일과 절대 혼합 금지'},
 ]},
 'TC9-l':{pat:'TC9 낮음 — 섬프 온도 비정상 저하',color:'#2eb8f5',sum:'정상 사이클 오프 (가장 흔함) / 2nd 미가동 / 센서 이상',causes:[
@@ -559,6 +559,7 @@ const TC_DB={
   {t:'Heat Exchange Probe Failure (TC10 센서 불량)',p:'m',sy:['Heat Exchange Probe Failure Warning 경보','TC10 비현실적 수치'],ch:['Heat Exchange Probe Failure Warning 이벤트 확인','백업 TC10 센서 자동 전환 여부'],ac:['백업 TC10 연결 확인 (내장 백업 자동 전환)','양쪽 모두 불량이면 Heat Exchange Box 전체 교체'],w:'TC10은 단독 교체 불가 — Heat Exchange Box 통째 교체 필요'},
 ]},
 'TC10-l':{pat:'TC10 낮음 — HX 과냉',color:'#b87cf5',sum:'1st 과충전 가능 (대부분 큰 문제 없음)',causes:[
+  {t:'막힘현상 발생, 장비 건조 후 재가동 필요',p:'h',sy:['TC10 비정상 저하','냉동 계통 흐름 정체'],ch:['캐필러리·필터드라이어 결빙 확인','TC3·TC4 동시 확인'],ac:['장비 전원 차단 후 충분히 건조','건조 완료 후 재가동'],w:null},
   {t:'1st Stage 냉매 과충전',p:'m',sy:['TC10 -55°C 이하','TC1도 낮을 수 있음'],ch:['TC1·TC10 동시 확인','1st 냉매 충전량 확인'],ac:['R-290 소량 회수 후 재측정'],w:null},
 ]},
 'RTD1-h':{pat:'RTD1 높음 — 냉동고 온도 설정값 초과',color:'#ff4444',sum:'High Temperature Warning 조건',causes:[
@@ -860,4 +861,3 @@ function switchTab(tab){
 }
 </script>
 </body>
-</html>
